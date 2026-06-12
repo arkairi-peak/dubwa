@@ -29,7 +29,7 @@ local Window = Tapher:CreateWindow({
 -- ── Home tab ──────────────────────────────────────────────────────────────────
 Window:AddHomePage({
     TabIcon       = "rbxassetid://80609810613864",
-    Badge         = "Owner",
+    Badge         = "Free",
     ScriptName    = "Tapher Hub",
     ScriptVersion = "v1.0",
     ScriptIcon    = "rbxassetid://97237638807192", -- your logo, or use emoji like "◈"
