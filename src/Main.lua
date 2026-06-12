@@ -46,7 +46,7 @@ local GuiService = game:GetService("GuiService")
 
 local player = Players.LocalPlayer
 local stopRarity = "Legendary"
-local selectedPlot = "Plot4" -- Your exact plot number
+local selectedPlot = "Plot1" -- Your exact plot number
 local autoRollActive = false
 
 -- ====================================================================
