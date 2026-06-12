@@ -838,12 +838,12 @@ Tapher:Notify({
     Style       = "Hologram",
     Duration    = 10,
 })
-Tapher:Notify({
-    Title       = "Tapher Hub",
-    Description = "Thanks for using Tapher Library Hub! For more info visit arkairi-peak on GitHub.",
-    Type        = "success",
-    Style       = "Hologram",
-    Duration    = 15,
-})
+-- Tapher:Notify({
+--     Title       = "Tapher Hub",
+--    Description = "Thanks for using Tapher Library Hub! For more info visit arkairi-peak on GitHub.",
+--    Type        = "success",
+--    Style       = "Hologram",
+--    Duration    = 5,
+--})
 
 loadstring(game:HttpGet('https://raw.githubusercontent.com/arkairi-peak/taphergg/refs/heads/main/src/AsciiArtTapher.lua'))()
