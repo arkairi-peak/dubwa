@@ -789,6 +789,7 @@ AntiTeleportLoaded = true
         end)
 
         print("[Tapher Anti-Teleport] Activated.")
+			Tapher:NotifyInfo("Tapher Information", "Anti Teleport is successfully activated, Only press this button once", "Hologram")
     end
 })
 
