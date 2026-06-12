@@ -382,7 +382,7 @@ task.spawn(function()
     end
 end)
 
-Settings:AddToggle({
+Misc:AddToggle({
     Name = "Infinite Zoom",
     Default = false,
     Flag = "InfiniteZoom",
