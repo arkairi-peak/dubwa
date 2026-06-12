@@ -741,6 +741,7 @@ Settings:AddButton({
 
 if AntiTeleportLoaded then
     return
+						Tapher:NotifyInfo("Tapher Information", "Anti Teleport was already activated.", "Hologram")	
 end
 
 AntiTeleportLoaded = true
@@ -789,7 +790,7 @@ AntiTeleportLoaded = true
         end)
 
         print("[Tapher Anti-Teleport] Activated.")
-			Tapher:NotifyInfo("Tapher Information", "Anti Teleport is successfully activated, Only press this button once", "Hologram")
+			Tapher:NotifyInfo("Tapher Information", "Anti Teleport is successfully activated, Only press this button once.", "Hologram")
     end
 })
 
