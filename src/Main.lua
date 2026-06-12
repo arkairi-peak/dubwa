@@ -373,7 +373,7 @@ local LocalPlayer = Players.LocalPlayer
 
 local OriginalMaxZoom = LocalPlayer.CameraMaxZoomDistance
 
-Settings:AddToggle({
+Misc:AddToggle({
     Name = "Infinite Zoom",
     Default = false,
     Flag = "InfiniteZoom",
