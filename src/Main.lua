@@ -368,6 +368,36 @@ Misc:AddSlider({
     end,
 })
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local InfiniteZoom = false
+local OriginalMaxZoom = LocalPlayer.CameraMaxZoomDistance
+
+task.spawn(function()
+    while task.wait(1) do
+        if InfiniteZoom then
+            LocalPlayer.CameraMaxZoomDistance = math.huge
+        end
+    end
+end)
+
+Settings:AddToggle({
+    Name = "Infinite Zoom",
+    Default = false,
+    Flag = "InfiniteZoom",
+
+    Callback = function(val)
+        InfiniteZoom = val
+
+        if val then
+            LocalPlayer.CameraMaxZoomDistance = math.huge
+        else
+            LocalPlayer.CameraMaxZoomDistance = OriginalMaxZoom
+        end
+    end,
+})
+
 Misc:AddSeparator("Misc")
 
 Misc:AddToggle({
