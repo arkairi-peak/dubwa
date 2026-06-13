@@ -39,6 +39,18 @@ local Feature = Window:AddTab({ Name = "Feature", Icon = "rbxassetid://105998503
 
 Feature:AddSeparator("Features")
 
+Feature:AddLabel("Get close to the roll button first before start rolling")
+Feature:AddLabel("Which Plot is yours is below")
+Feature:AddButton({
+    Name        = "Plot Information",
+    Description = "Click here to copy the link",
+    Callback    = function()
+        setclipboard("https://i.ibb.co/m58XTyrt/image.png")
+        Tapher:NotifySuccess("Copied!", "Plot location link copied to clipboard.", "Bounce")
+    end,
+})
+
+
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
@@ -234,14 +246,16 @@ Feature:AddDropdown({
     end
 })
 
-Feature:AddDropdown({
+Feature:AddMultiDropdown({
     Name     = "Select Rarity to Auto-Buy",
     Options  = { 
         "Common", "Rare", "Epic", "Legendary", "Mythic",  
         "Secret", "Limited", 
         "God", 
     },
-    Default  = "Legendary",
+	Max = 5,
+	Flag = "RarityChar",
+    Default  = "Mythic",
     Callback = function(val) 
         stopRarity = val
         print("[Auto-Roll] Filter rarity target: " .. stopRarity)
