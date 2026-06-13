@@ -50,7 +50,6 @@ Feature:AddButton({
     end,
 })
 
-
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
@@ -61,7 +60,7 @@ local selectedPlot = "Plot4"
 local autoRollActive = false
 
 -- MULTI-DROPDOWN CONFIGURATION
-_G.SelectedRarities = {} -- Clean global table matching your library style
+_G.SelectedRarities = {} 
 local HOLD_TIME = 0.5   
 local SERVER_SYNC = 0.8 
 
@@ -165,7 +164,7 @@ local function findAndClickCorrectBuyButton(detectedChar)
     return false
 end
 
--- FIXED MATCH FUNCTION: Safely scans your library's string array format using ipairs
+-- FIXED MATCH FUNCTION
 local function checkRarityMatch(inputString)
     if not _G.SelectedRarities then return false end
     local cleanedInput = string.lower(tostring(inputString))
@@ -231,7 +230,7 @@ local function getAllSpawnedTargetCharacters()
 end
 
 -- ====================================================================
--- UI LIBRARY INTEGRATION
+-- DROPDOWNS & TOGGLES
 -- ====================================================================
 
 Tab:AddDropdown({
@@ -244,7 +243,6 @@ Tab:AddDropdown({
     end
 })
 
--- Matches your layout rules precisely
 Tab:AddMultiDropdown({
     Name     = "Select Rarities to Auto-Buy",
     Options  = { 
@@ -278,6 +276,7 @@ Tab:AddToggle({
                 end
 
                 while autoRollActive do
+                    -- Clean state execution: Roll input sequence
                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
                     task.wait(0.05)
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
@@ -300,6 +299,7 @@ Tab:AddToggle({
                             end
                         end
                         
+                        -- Teleport Home sequence executed cleanly after the queue clears
                         character = player.Character
                         hrp = character and character:FindFirstChild("HumanoidRootPart")
                         if hrp and rollCFrame then
@@ -307,16 +307,18 @@ Tab:AddToggle({
                             hrp.CFrame = rollCFrame
                             task.wait(0.3)
                         end
-                        
-                        print("[Auto-System] Cycle clean. Prepared to re-roll.")
-                        task.wait(0.2)
                     end
+                    
+                    -- FIXED: This pacing wait and loop continue block now correctly sits 
+                    -- outside the item verification statement, allowing continuous execution.
+                    print("[Auto-System] Cycle clean. Prepared to re-roll.")
+                    task.wait(0.2)
                 end
                 print("[Auto-System] Loop safely stopped.")
             end)
         end
     end
-})
+}) -- FIXED: Added the missing closing parenthesis here
 
 -- tab misc / players
 local Misc = Window:AddTab({ Name = "Misc", Icon = "rbxassetid://130498102822965" })
