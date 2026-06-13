@@ -63,8 +63,8 @@ local autoRollActive = false
 
 -- MULTI-DROPDOWN CONFIGURATION
 _G.SelectedRarities = {} 
-local HOLD_TIME = 0.5   
-local SERVER_SYNC = 0.8 
+local HOLD_TIME = 0.3   
+local SERVER_SYNC = 0.6 
 
 -- 1. CLICK ENGINE
 local function clickUiButton(button)
@@ -314,7 +314,7 @@ Feature:AddToggle({
                     -- FIXED: This pacing wait and loop continue block now correctly sits 
                     -- outside the item verification statement, allowing continuous execution.
                     print("[Auto-System] Cycle clean. Prepared to re-roll.")
-                    task.wait(0.1)
+                    task.wait(0.09)
                 end
                 print("[Auto-System] Loop safely stopped.")
             end)
@@ -326,7 +326,7 @@ Feature:AddSeparator("Farm")
 
 Feature:AddDropdown({
     Name     = "Fast Forward Speed (x3 work)",
-    Options  = { "1", "2", "3" },
+    Options  = { "1", "2", "3", "4" },
     Default  = "1",
     Callback = function(val) 
         -- val comes back as a string, so tonumber() converts it back to a regular number
@@ -364,7 +364,7 @@ Feature:AddSeparator("Traits")
 local AutoRollSettings = {
     Enabled = false,
     TargetRarity = "Legendary",
-    DelayBetweenRolls = 0.38,
+    DelayBetweenRolls = 0.09,
     SelectedCharacterId = nil
 }
 
@@ -728,11 +728,11 @@ Misc:AddToggle({
     end,
 })
 
-_G.FlySpeed = 60
+_G.FlySpeed = 160
 Misc:AddSlider({
     Name    = "Flying Speed",
     Min     = 1,
-    Max     = 500,
+    Max     = 2000,
     Step    = 2,
     Default = 60,
     Flag    = "FlySpeed",
@@ -745,14 +745,14 @@ _G.ESPDistance = 500
 Misc:AddSlider({
     Name    = "ESP Distance",
     Min     = 10,
-    Max     = 2000,
+    Max     = 3000,
     Step    = 10,
     Default = 500,
     Flag    = "ESPDistance",
     Callback = function(val) _G.ESPDistance = val end,
 })
 
-_G.ESPColor = Color3.fromRGB(99, 102, 241)
+_G.ESPColor = Color3.fromRGB(234, 0, 255)
 Misc:AddColorPicker({
     Name    = "ESP Color",
     Default = _G.ESPColor,
