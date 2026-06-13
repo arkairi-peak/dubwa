@@ -314,7 +314,7 @@ Feature:AddToggle({
                     -- FIXED: This pacing wait and loop continue block now correctly sits 
                     -- outside the item verification statement, allowing continuous execution.
                     print("[Auto-System] Cycle clean. Prepared to re-roll.")
-                    task.wait(0.2)
+                    task.wait(0.1)
                 end
                 print("[Auto-System] Loop safely stopped.")
             end)
