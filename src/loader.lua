@@ -17,7 +17,7 @@ local Dropdown
 -- ── Create window ─────────────────────────────────────────────────────────────
 local Window = Tapher:CreateWindow({
     Title        = "Tapher Hub",
-    Subtitle     = "v1.0 • by Arkairi ⭐ ",
+    Subtitle     = "v1.2.1 • by Arkairi ⭐ ",
     LogoImage    = "rbxassetid://97237638807192", -- top-left corner icon (rbxassetid or emoji)
     Keybind      = Enum.KeyCode.RightShift,
     Watermark    = true,
@@ -31,7 +31,7 @@ Window:AddHomePage({
     TabIcon       = "rbxassetid://80609810613864",
     Badge         = "Free",
     ScriptName    = "Tapher Hub",
-    ScriptVersion = "v1.0",
+    ScriptVersion = "v1.2.1",
     ScriptIcon    = "rbxassetid://97237638807192", -- your logo, or use emoji like "◈"
 })
 -- tab main
@@ -819,8 +819,8 @@ Settings:AddButton({
 local About = Window:AddTab({ Name = "About", Icon = "rbxassetid://110553639595926" })
 
 About:AddSeparator("Info")
-About:AddLabel("TapherLib v1.0.0")
-About:AddLabel("A modern glassmorphism Roblox UI library.")
+About:AddLabel("TapherLib v1.2.1")
+About:AddLabel("A modern Roblox UI library.")
 About:AddLabel("Made with hardwork and creativity by Arkairi.")
 About:AddSeparator("Links")
 
