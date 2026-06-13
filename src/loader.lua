@@ -57,53 +57,45 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local GuiService = game:GetService("GuiService")
 
 local player = Players.LocalPlayer
-local stopRarity = "Legendary"
-local selectedPlot = "Plot1" -- Your exact plot number
+local selectedPlot = "Plot4" 
 local autoRollActive = false
 
--- ====================================================================
--- CONFIGURATION
-local HOLD_TIME = 0.5   -- How long to hold 'E' to roll
-local SERVER_SYNC = 0.8 -- Pacing delay allowing the unit to load fully
--- ====================================================================
+-- MULTI-DROPDOWN CONFIGURATION
+_G.SelectedRarities = {} -- Clean global table matching your library style
+local HOLD_TIME = 0.5   
+local SERVER_SYNC = 0.8 
 
 -- 1. CLICK ENGINE
 local function clickUiButton(button)
     if not button or not button.Visible then return false end
-    
     if typeof(firesignal) == "function" then
         firesignal(button.MouseButton1Click)
         firesignal(button.Activated)
         return true
     end
-    
     if button:IsA("GuiButton") then
         button:Activate()
     end
-    
     local inset = GuiService:GetGuiInset()
     local x = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
     local y = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + inset.Y
-    
     VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
     task.wait(0.05)
     VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
     return true
 end
 
--- 2. TARGET-LOCKED BUY EXECUTIONER (WITH TELEPORTATION)
+-- 2. TARGET-LOCKED BUY EXECUTIONER
 local function findAndClickCorrectBuyButton(detectedChar)
     local character = player.Character
     local hrp = character and character:FindFirstChild("HumanoidRootPart")
     local charPart = detectedChar:FindFirstChildOfClass("BasePart") or detectedChar.PrimaryPart
     
-    -- Teleport to the pad to satisfy the proximity check
     if hrp and charPart then
         hrp.CFrame = charPart.CFrame * CFrame.new(0, 3, 0)
         task.wait(0.15) 
     end
 
-    -- ProximityPrompt Detection
     if typeof(fireproximityprompt) == "function" then
         for _, prompt in ipairs(detectedChar:GetDescendants()) do
             if prompt:IsA("ProximityPrompt") then
@@ -121,7 +113,6 @@ local function findAndClickCorrectBuyButton(detectedChar)
         end
     end
 
-    -- UI Element Search
     local playerGui = player:FindFirstChild("PlayerGui")
     if not playerGui then return false end
 
@@ -134,12 +125,8 @@ local function findAndClickCorrectBuyButton(detectedChar)
             local buttonName = string.lower(obj.Name)
             local buttonText = obj:IsA("TextButton") and string.lower(obj.Text) or ""
             
-            local isBuyButton = string.find(buttonName, "buy") or 
-                                string.find(buttonName, "claim") or 
-                                string.find(buttonName, "purchase") or
-                                string.find(buttonText, "buy") or 
-                                string.find(buttonText, "claim") or 
-                                string.find(buttonText, "purchase")
+            local isBuyButton = string.find(buttonName, "buy") or string.find(buttonName, "claim") or string.find(buttonName, "purchase") or
+                                string.find(buttonText, "buy") or string.find(buttonText, "claim") or string.find(buttonText, "purchase")
                                 
             if isBuyButton then
                 local billboard = obj:FindFirstAncestorOfClass("BillboardGui")
@@ -174,10 +161,20 @@ local function findAndClickCorrectBuyButton(detectedChar)
         end
     end
 
-    if bestButton then
-        return clickUiButton(bestButton)
-    end
+    if bestButton then return clickUiButton(bestButton) end
+    return false
+end
+
+-- FIXED MATCH FUNCTION: Safely scans your library's string array format using ipairs
+local function checkRarityMatch(inputString)
+    if not _G.SelectedRarities then return false end
+    local cleanedInput = string.lower(tostring(inputString))
     
+    for _, checkedRarity in ipairs(_G.SelectedRarities) do
+        if string.find(cleanedInput, string.lower(tostring(checkedRarity))) then
+            return true 
+        end
+    end
     return false
 end
 
@@ -192,17 +189,18 @@ local function getAllSpawnedTargetCharacters()
     local charactersFolder = myPlot:FindFirstChild("Characters")
     if not charactersFolder then return {} end
 
-    local targetRarityLower = string.lower(stopRarity)
     local targetsFound = {}
 
     for _, charInstance in ipairs(charactersFolder:GetChildren()) do
         local isMatch = false
-        if string.find(string.lower(charInstance.Name), targetRarityLower) then isMatch = true end
+        
+        if checkRarityMatch(charInstance.Name) then isMatch = true end
+        
         if not isMatch then
             local commonAttributes = {"Rarity", "Tier", "RarityName", "Type", "Quality"}
             for _, attrName in ipairs(commonAttributes) do
                 local attrVal = charInstance:GetAttribute(attrName)
-                if attrVal and string.find(string.lower(tostring(attrVal)), targetRarityLower) then 
+                if attrVal and checkRarityMatch(attrVal) then 
                     isMatch = true
                     break
                 end
@@ -210,7 +208,7 @@ local function getAllSpawnedTargetCharacters()
         end
         if not isMatch then
             for _, child in ipairs(charInstance:GetChildren()) do
-                if (child:IsA("StringValue") or child:IsA("ObjectValue")) and string.find(string.lower(tostring(child.Value)), targetRarityLower) then 
+                if (child:IsA("StringValue") or child:IsA("ObjectValue")) and checkRarityMatch(child.Value) then 
                     isMatch = true
                     break
                 end
@@ -220,7 +218,7 @@ local function getAllSpawnedTargetCharacters()
             for _, desc in ipairs(charInstance:GetDescendants()) do
                 if desc:IsA("TextLabel") and desc.Visible and desc.Text ~= "" then
                     local cleanText = string.gsub(desc.Text, "<[^>]+>", "")
-                    if string.find(string.lower(cleanText), targetRarityLower) then 
+                    if checkRarityMatch(cleanText) then 
                         isMatch = true
                         break
                     end
@@ -236,7 +234,7 @@ end
 -- UI LIBRARY INTEGRATION
 -- ====================================================================
 
-Feature:AddDropdown({
+Tab:AddDropdown({
     Name     = "Select Your Plot Location",
     Options  = { "Plot1", "Plot2", "Plot3", "Plot4", "Plot5", "Plot6" },
     Default  = "Plot4",
@@ -246,42 +244,40 @@ Feature:AddDropdown({
     end
 })
 
-Feature:AddMultiDropdown({
-    Name     = "Select Rarity to Auto-Buy",
+-- Matches your layout rules precisely
+Tab:AddMultiDropdown({
+    Name     = "Select Rarities to Auto-Buy",
     Options  = { 
         "Common", "Rare", "Epic", "Legendary", "Mythic",  
-        "Secret", "Limited", 
-        "God", 
+        "God", "Secret",  "Limited", 
+        "Anomali", 
     },
-	Max = 5,
-	Flag = "RarityChar",
-    Default  = "Mythic",
-    Callback = function(val) 
-        stopRarity = val
-        print("[Auto-Roll] Filter rarity target: " .. stopRarity)
-    end
+    Default  = {},
+    Flag     = "SelectedRarities",
+    Callback = function(selected) 
+        _G.SelectedRarities = selected
+        print("[Auto-Roll] Tracking: " .. table.concat(selected, ", "))
+    end,
 })
 
-Feature:AddToggle({
+Tab:AddToggle({
     Name     = "Infinite Roll & Multi-Buy",
     Default  = false,
     Callback = function(state)
         autoRollActive = state
         
         if autoRollActive then
-            print("[Auto-System] Continuous macro engaged.")
+            print("[Auto-System] Continuous multi-rarity macro engaged.")
             task.spawn(function()
-                -- CAPTURE HOME POSITION: Saves where you are standing when you turn the script ON
                 local rollCFrame = nil
                 local character = player.Character
                 local hrp = character and character:FindFirstChild("HumanoidRootPart")
                 if hrp then
                     rollCFrame = hrp.CFrame
-                    print("[Auto-System] Saved roll position anchor point.")
+                    print("[Auto-System] Anchored home base location.")
                 end
 
                 while autoRollActive do
-                    -- Step A: Force clear inputs and roll
                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
                     task.wait(0.05)
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
@@ -290,31 +286,29 @@ Feature:AddToggle({
                     
                     task.wait(SERVER_SYNC)
                     
-                    -- Step B: Queue check
                     local targetUnits = getAllSpawnedTargetCharacters()
                     if #targetUnits > 0 then
-                        print("[Auto-System] Matches found: " .. tostring(#targetUnits) .. ". Processing...")
+                        print("[Auto-System] Matches discovered: " .. tostring(#targetUnits))
                         
                         for _, unit in ipairs(targetUnits) do
                             if not autoRollActive then break end
-                            print("[Auto-System] Buying target: " .. unit.Name)
+                            print("[Auto-System] Teleporting and buying: " .. unit.Name)
                             
                             local bought = findAndClickCorrectBuyButton(unit)
                             if bought then
-                                task.wait(0.4) -- Wait for server processing
+                                task.wait(0.4)
                             end
                         end
                         
-                        -- Step C: RETURN HOME (Teleport back to the roll button position)
                         character = player.Character
                         hrp = character and character:FindFirstChild("HumanoidRootPart")
                         if hrp and rollCFrame then
-                            print("[Auto-System] Returning to roll position...")
+                            print("[Auto-System] Returning home to roll platform...")
                             hrp.CFrame = rollCFrame
-                            task.wait(0.3) -- Let physics engine settle down
+                            task.wait(0.3)
                         end
                         
-                        print("[Auto-System] Ready for next cycle.")
+                        print("[Auto-System] Cycle clean. Prepared to re-roll.")
                         task.wait(0.2)
                     end
                 end
