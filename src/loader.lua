@@ -37,7 +37,7 @@ Window:AddHomePage({
 -- tab main
 local Feature = Window:AddTab({ Name = "Feature", Icon = "rbxassetid://105998503314801" })
 
-Feature:AddSeparator("Features")
+Feature:AddSeparator("Instruction")
 
 Feature:AddLabel("Get close to the roll button first before start rolling")
 Feature:AddLabel("Which Plot is yours is below")
@@ -49,6 +49,8 @@ Feature:AddButton({
         Tapher:NotifySuccess("Copied!", "Plot location link copied to clipboard.", "Bounce")
     end,
 })
+
+Feature:AddSeparator("Features")
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
