@@ -237,9 +237,9 @@ Feature:AddDropdown({
 Feature:AddDropdown({
     Name     = "Select Rarity to Auto-Buy",
     Options  = { 
-        "Common", "Rare", "Epic", "Legendary", "Mythic", "Divine", 
-        "God", "Godly", "Godlyx", "INVASION", "Immortal", "Limited", 
-        "OG", "OP", "Secret" 
+        "Common", "Rare", "Epic", "Legendary", "Mythic",  
+        "Secret", "Limited", 
+        "God", 
     },
     Default  = "Legendary",
     Callback = function(val) 
