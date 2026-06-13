@@ -40,7 +40,7 @@ local Feature = Window:AddTab({ Name = "Feature", Icon = "rbxassetid://105998503
 Feature:AddSeparator("Instruction")
 
 Feature:AddLabel("Get close to the roll button first before start rolling")
-Feature:AddLabel("Which Plot is yours is below")
+Feature:AddLabel("Which Plot location is yours at is below")
 Feature:AddButton({
     Name        = "Plot Information",
     Description = "Click here to copy the link",
