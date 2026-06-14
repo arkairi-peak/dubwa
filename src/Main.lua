@@ -187,8 +187,8 @@ local Games = {
         loadstring(game:HttpGet("https://raw.githubusercontent.com/arkairi-peak/dubwa/refs/heads/main/src/loader.lua"))()
     end,
 
-    [6767] = function()
-        loadstring(game:HttpGet("https://your-game2-script-url"))()
+    [112490729816320] = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/arkairi-peak/dubwa/refs/heads/main/src/spinSoccerCard.lua"))()
     end,
 
     [12345] = function()
