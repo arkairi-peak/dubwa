@@ -182,9 +182,28 @@ submit.MouseButton1Click:Connect(function()
 
 		task.wait(0.5)
 
-		loadstring(game:HttpGet(
-			"https://raw.githubusercontent.com/arkairi-peak/dubwa/refs/heads/main/src/loader.lua"
-		))()
+local Games = {
+    [105031185134358] = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/arkairi-peak/dubwa/refs/heads/main/src/loader.lua"))()
+    end,
+
+    [6767] = function()
+        loadstring(game:HttpGet("https://your-game2-script-url"))()
+    end,
+
+    [12345] = function()
+        loadstring(game:HttpGet("https://your-game3-script-url"))()
+    end,
+}
+
+local Script = Games[game.PlaceId]
+
+if Script then
+    Script()
+else
+    warn("Unsupported game:", game.PlaceId)
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/arkairi-peak/taphergg/refs/heads/main/src/Example.lua"))()
+end
 
 		gui:Destroy()
 
