@@ -1,0 +1,676 @@
+--[[
+    Example.lua — TapherLib demo script
+    Replace BASE_URL in Main.lua with your raw GitHub URL first.
+]]
+
+local Tapher = loadstring(game:HttpGet('https://raw.githubusercontent.com/arkairi-peak/taphergg/refs/heads/main/src/Main.lua'))()
+
+local Players     = game:GetService("Players")
+local RunService  = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+_G.SelectedPlayer  = nil
+_G.OrbitConnection = nil
+
+local Dropdown
+
+-- ── Create window ─────────────────────────────────────────────────────────────
+local Window = Tapher:CreateWindow({
+    Title        = "Tapher Hub - [🏆] Spin a Soccer Card",
+    Subtitle     = "v1.2.2 • by Arkairi ⭐ ",
+    LogoImage    = "rbxassetid://97237638807192", -- top-left corner icon (rbxassetid or emoji)
+    Keybind      = Enum.KeyCode.RightShift,
+    Watermark    = true,
+    SearchBar    = true,
+    MinimiseMode = "Float",
+    FloatImage   = "rbxassetid://97237638807192",
+})
+
+-- ── Home tab ──────────────────────────────────────────────────────────────────
+Window:AddHomePage({
+    TabIcon       = "rbxassetid://80609810613864",
+    Badge         = "Free",
+    ScriptName    = "Tapher Hub",
+    ScriptVersion = "v1.2.2",
+    ScriptIcon    = "rbxassetid://97237638807192", -- your logo, or use emoji like "◈"
+})
+
+-- main tab lol 
+local Feature = Window:AddTab({ Name = "Feature", Icon = "rbxassetid://105998503314801" })
+
+Feature:AddSeparator("Money")
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CollectSlotRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CollectSlot")
+
+-- State Variables
+local isEnabled = false
+local loopDelay = 3 -- Default matches the slider's default
+
+-- Function to handle the loop execution
+local function startLoop()
+    task.spawn(function()
+        while isEnabled do
+            -- Fires slots 1 through 10
+            for i = 1, 10 do
+                -- Checking state inside the loop ensures it stops immediately if toggled off mid-fire
+                if not isEnabled then break end 
+                
+                CollectSlotRemote:FireServer(i)
+            end
+            
+            -- Dynamic wait time based on your slider
+            task.wait(loopDelay)
+        end
+    end)
+end
+
+-- Toggle Feature
+Feature:AddToggle({
+    Name    = "Auto Collect Money",
+    Default = false,
+    Flag    = "auto_collect_slots",
+    Callback = function(val)
+        isEnabled = val
+        if isEnabled then
+            startLoop()
+        end
+    end,
+})
+
+-- Slider Feature
+Feature:AddSlider({
+    Name    = "Collect Interval (Seconds)",
+    Min     = 1,
+    Max     = 160,
+    Default = 3,
+    Flag    = "second",
+    Callback = function(val)
+        loopDelay = val
+    end,
+})
+
+Feature:AddSeparator("Rebirth")
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local RebirthRemote = Remotes:WaitForChild("Rebirth")
+
+-- State Variables
+local isEnabled = false
+local loopDelay = 3 
+
+local function startLoop()
+    task.spawn(function()
+        while isEnabled do
+            -- Fires your rebirth remote
+            RebirthRemote:FireServer()
+            
+            task.wait(loopDelay)
+        end
+    end)
+end
+
+-- Toggle Feature
+Feature:AddToggle({
+    Name    = "Auto Rebirth",
+    Default = false,
+    Flag    = "auto_rebirth",
+    Callback = function(val)
+        isEnabled = val
+        if isEnabled then
+            startLoop()
+        end
+    end,
+})
+
+-- Slider Feature
+Feature:AddSlider({
+    Name    = "Rebirth Interval",
+    Min     = 1,
+    Max     = 5000,
+    Default = 60,
+    Flag    = "rebirth_second",
+    Callback = function(val)
+        loopDelay = val
+    end,
+})
+
+-- tab misc / players
+local Misc = Window:AddTab({ Name = "Misc", Icon = "rbxassetid://130498102822965" })
+
+Misc:AddSeparator("Player")
+
+Misc:AddToggle({
+    Name    = "Infinite Jump",
+    Default = false,
+    Flag    = "InfJump",
+    Callback = function(val)
+        if val then
+            local UIS = game:GetService("UserInputService")
+            _G.InfJumpConnection = UIS.JumpRequest:Connect(function()
+                local char = Players.LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+                end
+            end)
+        else
+            if _G.InfJumpConnection then
+                _G.InfJumpConnection:Disconnect()
+                _G.InfJumpConnection = nil
+            end
+        end
+    end,
+})
+
+Misc:AddSlider({
+    Name    = "Walk Speed",
+    Min     = 16,
+    Max     = 500,
+    Step    = 2,
+    Default = 16,
+    Flag    = "WalkSpeed",
+    Callback = function(val)
+        local char = Players.LocalPlayer.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = val
+        end
+    end,
+})
+
+Misc:AddSlider({
+    Name    = "Jump Power",
+    Min     = 50,
+    Max     = 500,
+    Step    = 10,
+    Default = 50,
+    Flag    = "JumpPower",
+    Callback = function(val)
+        local char = Players.LocalPlayer.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.JumpPower = val
+        end
+    end,
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local OriginalMaxZoom = LocalPlayer.CameraMaxZoomDistance
+
+Misc:AddToggle({
+    Name = "Infinite Zoom",
+    Default = false,
+    Flag = "InfiniteZoom",
+
+    Callback = function(val)
+        if val then
+            LocalPlayer.CameraMaxZoomDistance = math.huge
+            print("Infinite Zoom Enabled")
+        else
+            LocalPlayer.CameraMaxZoomDistance = OriginalMaxZoom
+            print("Infinite Zoom Disabled")
+        end
+    end,
+})
+
+Misc:AddSeparator("Misc")
+
+Misc:AddToggle({
+    Name    = "Noclip",
+    Default = false,
+    Flag    = "Noclip",
+    Callback = function(val)
+        _G.Noclip = val
+        if val then
+            _G.NoclipConnection = RunService.Stepped:Connect(function()
+                local char = Players.LocalPlayer.Character
+                if char then
+                    for _, part in pairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        else
+            if _G.NoclipConnection then
+                _G.NoclipConnection:Disconnect()
+                _G.NoclipConnection = nil
+            end
+        end
+    end,
+})
+
+Misc:AddToggle({ 
+    Name    = "Fly",
+    Default = false,
+    Flag    = "Fly",
+    Callback = function(enabled)
+        local UIS = game:GetService("UserInputService")
+        local player    = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid  = character:WaitForChild("Humanoid")
+        local root      = character:WaitForChild("HumanoidRootPart")
+
+        if enabled then
+            local bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            bv.Velocity = Vector3.zero
+            bv.Parent   = root
+
+            local bg = Instance.new("BodyGyro")
+            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.P = 1000
+            bg.D = 50
+            bg.CFrame = root.CFrame
+            bg.Parent  = root
+
+            _G.FlyBV = bv
+            _G.FlyBG = bg
+
+            _G.FlyConnection = RunService.RenderStepped:Connect(function()
+                local cam = workspace.CurrentCamera
+                local dir = Vector3.zero
+
+                if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector  end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector  end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.Space)       then dir += Vector3.new(0,1,0) end
+                if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then dir -= Vector3.new(0,1,0) end
+
+                if dir.Magnitude > 0 then dir = dir.Unit end
+                bv.Velocity = dir * (_G.FlySpeed or 60)
+                bg.CFrame   = cam.CFrame
+            end)
+
+            humanoid.PlatformStand = true
+        else
+            humanoid.PlatformStand = false
+            if _G.FlyConnection then _G.FlyConnection:Disconnect(); _G.FlyConnection = nil end
+            if _G.FlyBV then _G.FlyBV:Destroy(); _G.FlyBV = nil end
+            if _G.FlyBG then _G.FlyBG:Destroy(); _G.FlyBG = nil end
+        end
+    end,
+})
+
+_G.FlySpeed = 160
+Misc:AddSlider({
+    Name    = "Flying Speed",
+    Min     = 1,
+    Max     = 2000,
+    Step    = 2,
+    Default = 60,
+    Flag    = "FlySpeed",
+    Callback = function(val) _G.FlySpeed = val end,
+})
+
+Misc:AddSeparator("ESP")
+
+_G.ESPDistance = 500
+Misc:AddSlider({
+    Name    = "ESP Distance",
+    Min     = 10,
+    Max     = 3000,
+    Step    = 10,
+    Default = 500,
+    Flag    = "ESPDistance",
+    Callback = function(val) _G.ESPDistance = val end,
+})
+
+_G.ESPColor = Color3.fromRGB(234, 0, 255)
+Misc:AddColorPicker({
+    Name    = "ESP Color",
+    Default = _G.ESPColor,
+    Flag    = "ESPColor",
+    Callback = function(color) _G.ESPColor = color end,
+})
+
+Misc:AddToggle({
+    Name    = "ESP (Highlight + Line)",
+    Default = false,
+    Flag    = "ESP",
+    Callback = function(val)
+        if val then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    local function applyESP(char)
+                        local hrp    = char:FindFirstChild("HumanoidRootPart")
+                        local myChar = LocalPlayer.Character
+                        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+                        if not hrp or not myRoot then return end
+
+                        local dist = (hrp.Position - myRoot.Position).Magnitude
+                        if dist > (_G.ESPDistance or 500) then return end
+
+                        for _, v in ipairs(hrp:GetChildren()) do
+                            if v.Name == "ESP_Highlight" or v.Name == "ESP_Att0" or v.Name == "ESP_Beam" then
+                                v:Destroy()
+                            end
+                        end
+
+                        local hl = Instance.new("Highlight")
+                        hl.Name               = "ESP_Highlight"
+                        hl.Adornee            = char
+                        hl.FillTransparency   = 1
+                        hl.OutlineTransparency= 0
+                        hl.OutlineColor       = _G.ESPColor
+                        hl.Parent             = hrp
+
+                        local att0 = Instance.new("Attachment")
+                        att0.Name   = "ESP_Att0"
+                        att0.Parent = hrp
+
+                        local att1 = Instance.new("Attachment")
+                        att1.Name   = "ESP_Att1"
+                        att1.Parent = myRoot
+
+                        local beam = Instance.new("Beam")
+                        beam.Name        = "ESP_Beam"
+                        beam.Attachment0 = att0
+                        beam.Attachment1 = att1
+                        beam.Width0      = 0.1
+                        beam.Width1      = 0.1
+                        beam.FaceCamera  = true
+                        beam.Color       = ColorSequence.new(_G.ESPColor)
+                        beam.Parent      = hrp
+                    end
+
+                    if player.Character then applyESP(player.Character) end
+                    player.CharacterAdded:Connect(function(char)
+                        if _G.ESP then task.wait(0.5); applyESP(char) end
+                    end)
+                end
+            end
+        else
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Character then
+                    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        for _, v in ipairs(hrp:GetChildren()) do
+                            if v.Name == "ESP_Highlight" or v.Name == "ESP_Att0" or v.Name == "ESP_Beam" then
+                                v:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end,
+})
+
+Misc:AddSeparator("Spin")
+
+local function GetPlayerList()
+    local list = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then table.insert(list, plr.Name) end
+    end
+    return list
+end
+
+Dropdown = Misc:AddDropdown({
+    Name     = "Select Player",
+    Options  = GetPlayerList(),
+    Default  = nil,
+    Callback = function(val)
+	 _G.SelectedPlayer = val end,
+})
+
+Misc:AddButton({
+    Name = "Refresh Player List",
+    Callback = function()
+        Dropdown:Refresh(GetPlayerList())
+    end,
+})
+
+Misc:AddToggle({
+    Name    = "Orbit Player",
+    Default = false,
+    Flag    = "OrbitPlayer",
+    Callback = function(val)
+        if val then
+            _G.OrbitConnection = RunService.RenderStepped:Connect(function()
+                local target = Players:FindFirstChild(_G.SelectedPlayer)
+                if not target then return end
+
+                local char   = target.Character
+                local myChar = LocalPlayer.Character
+                if not char or not myChar then return end
+
+                local targetRoot = char:FindFirstChild("HumanoidRootPart")
+                local myRoot     = myChar:FindFirstChild("HumanoidRootPart")
+                if not targetRoot or not myRoot then return end
+
+                local att0 = myRoot:FindFirstChild("OrbitAttachment") or Instance.new("Attachment")
+                att0.Name   = "OrbitAttachment"
+                att0.Parent = myRoot
+
+                local att1 = targetRoot:FindFirstChild("OrbitTargetAttachment") or Instance.new("Attachment")
+                att1.Name   = "OrbitTargetAttachment"
+                att1.Parent = targetRoot
+
+                local align = myRoot:FindFirstChild("OrbitAlign") or Instance.new("AlignPosition")
+                align.Name           = "OrbitAlign"
+                align.Attachment0    = att0
+                align.Attachment1    = att1
+                align.MaxForce       = 50000
+                align.Responsiveness = 25
+                align.RigidityEnabled= false
+                align.Parent         = myRoot
+
+                local radius = 6
+                local speed  = 14
+                local angle  = tick() * speed
+                att1.Position = Vector3.new(
+                    math.cos(angle) * radius,
+                    2,
+                    math.sin(angle) * radius
+                )
+            end)
+        else
+            if _G.OrbitConnection then
+                _G.OrbitConnection:Disconnect()
+                _G.OrbitConnection = nil
+            end
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local root = char.HumanoidRootPart
+                if root:FindFirstChild("OrbitAlign")      then root.OrbitAlign:Destroy()      end
+                if root:FindFirstChild("OrbitAttachment") then root.OrbitAttachment:Destroy() end
+            end
+        end
+    end,
+})
+
+-- ── Tab: Settings ─────────────────────────────────────────────────────────────
+local Settings = Window:AddTab({ Name = "Settings", Icon = "rbxassetid://109766113740047" })
+
+Settings:AddLabel("Accent Theme")
+
+Settings:AddDropdown({
+    Name     = "Accent Color",
+    Options  = { "Purple", "Blue", "Cyan", "Pink", "Green", "Red", "Orange", "Gold" },
+    Default  = "Purple",
+    Callback = function(val) Tapher:SetAccent(val) end,
+})
+
+Settings:AddSeparator("Config")
+
+Settings:AddButton({
+    Name        = "Save Config",
+    Description = "Saves current settings to file",
+    Callback    = function()
+        local ok = Tapher:SaveConfig("default")
+        if ok then
+            Tapher:NotifySuccess("Saved!", "Config saved to TapherLib/default.json", "Bounce")
+        else
+            Tapher:NotifyError("Failed", "Could not save config (writefile unavailable)", "Glitch")
+        end
+    end,
+})
+
+Settings:AddButton({
+    Name        = "Load Config",
+    Description = "Loads settings from file",
+    Callback    = function()
+        local ok = Tapher:LoadConfig("default")
+        if ok then
+            Tapher:NotifyInfo("Loaded", "Config restored successfully", "Hologram")
+        else
+            Tapher:NotifyWarning("Not found", "No saved config found", "Slide")
+        end
+    end,
+})
+
+local VirtualUser = game:GetService("VirtualUser")
+local Players = game:GetService("Players")
+
+local AntiAFKConnection
+
+Settings:AddToggle({
+    Name    = "Anti AFK",
+    Default = true,
+    Flag    = "Anti-afkers",
+
+    Callback = function(val)
+
+        if val then
+            AntiAFKConnection = Players.LocalPlayer.Idled:Connect(function()
+                VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            end)
+
+            print("✔ Anti AFK Enabled")
+
+        else
+            if AntiAFKConnection then
+                AntiAFKConnection:Disconnect()
+                AntiAFKConnection = nil
+            end
+
+            print("✘ Anti AFK Disabled")
+        end
+
+    end,
+})
+
+
+local AntiTeleportLoaded = false
+Settings:AddButton({
+    Name = "Block Server Teleports",
+    Description = "Prevents teleports to other servers",
+    Callback = function()
+
+if AntiTeleportLoaded then
+    return
+						Tapher:NotifyInfo("Tapher Information", "Anti Teleport was already activated.", "Hologram")	
+end
+
+AntiTeleportLoaded = true
+
+        if not hookmetamethod then
+            warn("Your executor does not support hookmetamethod.")
+            return
+        end
+
+        local TeleportService = game:GetService("TeleportService")
+
+        local oldIndex
+        local oldNamecall
+
+        oldIndex = hookmetamethod(game, "__index", function(self, method)
+            if self == TeleportService then
+                method = tostring(method)
+
+                if method == "Teleport"
+                or method == "TeleportAsync"
+                or method == "TeleportPartyAsync"
+                or method == "TeleportToPlaceInstance"
+                or method == "TeleportToPrivateServer" then
+                    error("Tapher Teleport blocked.", 2)
+                end
+            end
+
+            return oldIndex(self, method)
+        end)
+
+        oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+            if self == TeleportService then
+                local method = tostring(getnamecallmethod())
+
+                if method == "Teleport"
+                or method == "TeleportAsync"
+                or method == "TeleportPartyAsync"
+                or method == "TeleportToPlaceInstance"
+                or method == "TeleportToPrivateServer" then
+                    warn("[Tapher Anti-Teleport] Blocked:", method)
+                    return nil
+                end
+            end
+
+            return oldNamecall(self, ...)
+        end)
+
+        print("[Tapher Anti-Teleport] Activated.")
+			Tapher:NotifyInfo("Tapher Information", "Anti Teleport is successfully activated, Only press this button once.", "Hologram")
+    end
+})
+
+Settings:AddSeparator("Notifications TEST")
+
+Settings:AddButton({
+    Name = "Test Hologram Notification",
+    Callback = function()
+        Tapher:NotifyInfo("Hologram Notification", "Hallo, yang baca ini orang ganteg.", "Hologram")
+    end,
+})
+
+-- ── Tab: About ────────────────────────────────────────────────────────────────
+local About = Window:AddTab({ Name = "About", Icon = "rbxassetid://110553639595926" })
+
+About:AddSeparator("Info")
+About:AddLabel("TapherLib v1.0.0")
+About:AddLabel("A modern Roblox UI library.")
+About:AddLabel("Made with hardwork and creativity by Arkairi.")
+About:AddSeparator("Links")
+
+About:AddButton({
+    Name        = "Discord",
+    Description = "Join the community",
+    Callback    = function()
+        setclipboard("YOUR_DISCORD_LINK")
+        Tapher:NotifySuccess("Copied!", "Discord link copied to clipboard.", "Bounce")
+    end,
+})
+
+About:AddButton({
+    Name        = "Youtube",
+    Description = "Subscribe the channel",
+    Callback    = function()
+        setclipboard("YOUR_YOUTUBE_LINK")
+        Tapher:NotifySuccess("Copied!", "Youtube channel link copied to clipboard.", "Bounce")
+    end,
+})
+
+-- ── Startup notifications ─────────────────────────────────────────────────────
+task.wait(2)
+Tapher:Notify({
+    Title       = "Tapher Hub",
+    Description = "Loaded successfully! Press RightShift to toggle.",
+    Type        = "success",
+    Style       = "Hologram",
+    Duration    = 10,
+})
+-- Tapher:Notify({
+--     Title       = "Tapher Hub",
+--    Description = "Thanks for using Tapher Library Hub! For more info visit arkairi-peak on GitHub.",
+--    Type        = "success",
+--    Style       = "Hologram",
+--    Duration    = 5,
+--})
+
+loadstring(game:HttpGet('https://raw.githubusercontent.com/arkairi-peak/taphergg/refs/heads/main/src/AsciiArtTapher.lua'))()
