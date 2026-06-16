@@ -143,39 +143,56 @@ local OpenPackRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("O
 
 -- State Variables
 local isEnabled = false
-local selectedPacks = {} 
-local loopDelay = 1      
+local queue = {}          -- Linear list of currently selected packs
+local currentTrack = 1    -- Tracks our position in the rotation
+
+-- Function to rebuild the queue in an orderly fashion whenever the UI changes
+local function updateQueue(val)
+    table.clear(queue)
+    
+    -- Check both UI formats and insert string names sequentially
+    for key, value in pairs(val) do
+        if type(key) == "string" and value == true then
+            table.insert(queue, key)
+        elseif type(value) == "string" then
+            table.insert(queue, value)
+        end
+    end
+end
 
 -- Loop Logic
 local function startLoop()
     task.spawn(function()
+        currentTrack = 1 -- Reset position when turned on
+        
         while isEnabled do
-            
-            -- Track if we actually found and fired anything this loop iteration
-            for key, value in pairs(selectedPacks) do
-                if isEnabled then
-                    local packName = nil
-                    
-                    -- Handle Format 1: {["Bronze"] = true}
-                    if type(key) == "string" and value == true then
-                        packName = key
-                    -- Handle Format 2: {"Bronze", "Silver"}
-                    elseif type(value) == "string" then
-                        packName = value
-                    end
-                    
-                    -- If we successfully got the string name, fire it
-                    if packName then
-                        local args = {
-                            packName -- This will literally be "Bronze", "Silver", etc.
-                        }
-                        OpenPackRemote:FireServer(unpack(args))
-                        task.wait(0.1) -- Small safety delay between multiple selections
-                    end
+            -- Only run if the user actually has packs selected
+            if #queue > 0 then
+                -- Safety check: Make sure our tracker doesn't overshoot if selections changed mid-loop
+                if currentTrack > #queue then
+                    currentTrack = 1
+                end
+                
+                -- Get the pack name for this turn
+                local packName = queue[currentTrack]
+                
+                if packName then
+                    local args = {
+                        packName
+                    }
+                    OpenPackRemote:FireServer(unpack(args))
+                end
+                
+                -- Move to the next pack in line for the next loop cycle
+                currentTrack = currentTrack + 1
+                if currentTrack > #queue then
+                    currentTrack = 1 -- Loop back to the first selection
                 end
             end
             
-            task.wait(loopDelay)
+            -- Adjust this number to change how fast it opens. 
+            -- 0.1 seconds means 10 packs opened per second.
+            task.wait(0.1) 
         end
     end)
 end
@@ -207,7 +224,7 @@ Feature:AddMultiDropdown({
     Default  = {},
     Flag     = "selected_packs_flag",
     Callback = function(val) 
-        selectedPacks = val
+        updateQueue(val)
     end,
 })
 
