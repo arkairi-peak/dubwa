@@ -16,7 +16,7 @@ local Dropdown
 
 -- ── Create window ─────────────────────────────────────────────────────────────
 local Window = Tapher:CreateWindow({
-    Title        = "Tapher Hub",
+    Title        = "Tapher Hub - [UPD!] Defend ur base with anime",
     Subtitle     = "v1.2.2 • by Arkairi ⭐ ",
     LogoImage    = "rbxassetid://97237638807192", -- top-left corner icon (rbxassetid or emoji)
     Keybind      = Enum.KeyCode.RightShift,
