@@ -184,7 +184,7 @@ submit.MouseButton1Click:Connect(function()
 
 local Games = {
     [105031185134358] = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/arkairi-peak/dubwa/refs/heads/main/src/loader 1.2.1.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/arkairi-peak/dubwa/refs/heads/main/src/loader.lua"))()
     end,
 
     [112490729816320] = function()
