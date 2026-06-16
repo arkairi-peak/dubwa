@@ -136,6 +136,127 @@ Feature:AddSlider({
     end,
 })
 
+Feature:AddSeparator("Packs")
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local OpenPackRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("OpenPack")
+
+-- State Variables
+local isEnabled = false
+local selectedPacks = {} 
+local loopDelay = 1      
+
+-- Loop Logic
+local function startLoop()
+    task.spawn(function()
+        while isEnabled do
+            
+            -- Track if we actually found and fired anything this loop iteration
+            for key, value in pairs(selectedPacks) do
+                if isEnabled then
+                    local packName = nil
+                    
+                    -- Handle Format 1: {["Bronze"] = true}
+                    if type(key) == "string" and value == true then
+                        packName = key
+                    -- Handle Format 2: {"Bronze", "Silver"}
+                    elseif type(value) == "string" then
+                        packName = value
+                    end
+                    
+                    -- If we successfully got the string name, fire it
+                    if packName then
+                        local args = {
+                            packName -- This will literally be "Bronze", "Silver", etc.
+                        }
+                        OpenPackRemote:FireServer(unpack(args))
+                        task.wait(0.1) -- Small safety delay between multiple selections
+                    end
+                end
+            end
+            
+            task.wait(loopDelay)
+        end
+    end)
+end
+
+-- Toggle Feature
+Feature:AddToggle({
+    Name    = "Auto Open Packs",
+    Default = false,
+    Flag    = "auto_open_packs",
+    Callback = function(val)
+        isEnabled = val
+        if isEnabled then
+            startLoop()
+        end
+    end,
+})
+
+-- Multi-Dropdown Feature
+Feature:AddMultiDropdown({
+    Name     = "Select Packs",
+    Options  = { 
+        "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Bonded", 
+        "Toxic", "Shadow", "Infernal", "Corrupted", "Cosmic", "Eclipse", 
+        "Hades", "Heaven", "Chaos", "Ordain", "Alpha", "Omega", 
+        "Genesis", "Abyssal", "Enigma", "Oracle", "Wither", "Bloom", 
+        "Dawn", "Dusk", "Conquest", "Fallen", "Ruin", "Valor", 
+        "Terminus", "Infinity"
+    },
+    Default  = {},
+    Flag     = "selected_packs_flag",
+    Callback = function(val) 
+        selectedPacks = val
+    end,
+})
+
+Feature:AddSeparator("Index")
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local ClaimAllIndexRemote = Remotes:WaitForChild("ClaimAllIndexGems")
+
+-- State Variables
+local isEnabled = false
+local loopDelay = 3 
+
+local function startLoop()
+    task.spawn(function()
+        while isEnabled do
+            -- Fires your rebirth remote
+            ClaimAllIndexRemote:FireServer()
+            
+            task.wait(loopDelay)
+        end
+    end)
+end
+
+-- Toggle Feature
+Feature:AddToggle({
+    Name    = "Auto Claim Index Gems",
+    Default = false,
+    Flag    = "auto_index_gems",
+    Callback = function(val)
+        isEnabled = val
+        if isEnabled then
+            startLoop()
+        end
+    end,
+})
+
+-- Slider Feature
+Feature:AddSlider({
+    Name    = "Claim Interval",
+    Min     = 1,
+    Max     = 5000,
+    Default = 60,
+    Flag    = "indexclaim_second",
+    Callback = function(val)
+        loopDelay = val
+    end,
+})
+
 -- tab misc / players
 local Misc = Window:AddTab({ Name = "Misc", Icon = "rbxassetid://130498102822965" })
 
